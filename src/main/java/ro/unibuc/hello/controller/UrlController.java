@@ -1,15 +1,8 @@
 package ro.unibuc.hello.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
-
-
 import ro.unibuc.hello.data.Url;
 import ro.unibuc.hello.repository.UrlRepository;
 
@@ -20,18 +13,22 @@ public class UrlController {
 	@Autowired
 	private UrlRepository urlRepository;
 
-    @PostMapping(value = "/", consumes = "application/json")
-    public Url create(@RequestBody String payload) {
-        return urlRepository.save(new Url("test", "test"));
+    @PostMapping("/create/{long_url}/{short_url}")
+    public Url Create(@PathVariable("long_url") String long_url, @PathVariable("long_url") String short_url) {
+        return urlRepository.save(new Url(short_url, long_url));
     }
 
-    @DeleteMapping (value = "/", consumes = "application/json")
-    public String destroy(@RequestBody String payload) {
-        return payload;
+    @DeleteMapping ("/delete/{long_url}")
+    public Boolean Delete(@PathVariable("long_url") String long_url) {
+        if(urlRepository.findByLongUrl(long_url) == null){
+            return false;
+        }
+        urlRepository.delete(urlRepository.findByLongUrl(long_url));
+        return true;
     }
 
     @GetMapping(value = "/redirect/{short_url}")
-    public RedirectView redirect (@PathVariable("short_url") String short_url) {
+    public RedirectView Redirect (@PathVariable("short_url") String short_url) {
         Url shortUrl = urlRepository.findByShortUrl(short_url);
         return new RedirectView(shortUrl.getLongUrl());
     }
