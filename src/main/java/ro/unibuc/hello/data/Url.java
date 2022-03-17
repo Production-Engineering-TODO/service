@@ -1,13 +1,9 @@
 package ro.unibuc.hello.data;
 
-import java.util.Date;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 
-// @Document(collection = "urls")
+@Document(collection = "url")
 public class Url {
 
     @Id
@@ -43,8 +39,9 @@ public class Url {
 
     @Override
     public String toString() {
-        return String.format(
-                "Information[title='%s', description='%s']",
-                id, longUrl, shortUrl);
+        return "Url{" +
+                "longUrl='" + longUrl + '\'' +
+                ", shortUrl='" + shortUrl + '\'' +
+                '}';
     }
 }
