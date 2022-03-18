@@ -1,28 +1,13 @@
 package ro.unibuc.hello.controller;
 
-import java.lang.ProcessBuilder.Redirect;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import ro.unibuc.hello.data.InformationEntity;
-import ro.unibuc.hello.data.InformationRepository;
-import ro.unibuc.hello.dto.Greeting;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-
-
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import ro.unibuc.hello.data.Url;
-import ro.unibuc.hello.data.UrlRepository;
+import ro.unibuc.hello.repository.UrlRepository;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 
 @RestController
@@ -31,19 +16,53 @@ public class UrlController {
 	@Autowired
 	private UrlRepository urlRepository;
 
-    @PostMapping(value = "/", consumes = "application/json")
-    public Url create(@RequestBody String payload) {
-        return urlRepository.save(new Url("test", "test"));
+    @PostMapping("/")
+    public String Create(@RequestBody HashMap<Object, String> payload) throws Exception {
+        Url    existingUrl = urlRepository.findByLongUrl(payload.get("url"));
+        String shortUrl;
+
+        if (existingUrl != null)
+            shortUrl = existingUrl.getShortUrl ();
+        else {
+            String preferred = payload.get("preferred");
+            if (preferred != null) {
+                shortUrl = preferred;
+            } else {
+                shortUrl = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+            }
+            urlRepository.save(new Url(shortUrl, payload.get("url")));
+        }
+
+        return ("{url:\"" + shortUrl + "\"}");
     }
 
-    @DeleteMapping (value = "/", consumes = "application/json")
-    public String destroy(@RequestBody String payload) {
-        return payload;
+    @DeleteMapping ("/")
+    public String Destroy(@RequestBody HashMap<Object, String> payload) throws Exception {
+        Url existingUrl = urlRepository.findByShortUrl(payload.get ("url"));
+        String result;
+
+        if(existingUrl == null) {
+            result = "failed";
+        } else {
+            urlRepository.delete(existingUrl);
+            result = "success";
+        }
+
+        return ("{result:\"" + result + "\"}");
     }
 
-    @GetMapping(value = "/{short_url}")
-    public RedirectView redirect (@PathVariable String short_url) {
-        return new RedirectView(short_url);
+
+    @RequestMapping(value = "/{shortUrl}", method = RequestMethod.GET)
+    public ModelAndView Redirect(@PathVariable("shortUrl") String shortUrl) {
+        Url existingUrl = urlRepository.findByShortUrl(shortUrl);
+
+        String longUrl;
+        if (existingUrl == null)
+            longUrl = "/info";
+        else
+            longUrl = existingUrl.getLongUrl();
+
+        return new ModelAndView("redirect:https://" + longUrl);
     }
 }
 
