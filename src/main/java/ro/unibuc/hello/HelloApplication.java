@@ -13,7 +13,7 @@ import ro.unibuc.hello.repository.UrlRepository;
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
-@EnableMongoRepositories(basePackageClasses = InformationRepository.class)
+@EnableMongoRepositories(basePackageClasses = {InformationRepository.class, UrlRepository.class})
 public class HelloApplication implements CommandLineRunner {
 
 	@Autowired

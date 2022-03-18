@@ -2,9 +2,12 @@ package ro.unibuc.hello.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.ModelAndView;
 import ro.unibuc.hello.data.Url;
 import ro.unibuc.hello.repository.UrlRepository;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 
 @RestController
@@ -13,24 +16,53 @@ public class UrlController {
 	@Autowired
 	private UrlRepository urlRepository;
 
-    @PostMapping("/create/{long_url}/{short_url}")
-    public Url Create(@PathVariable("long_url") String long_url, @PathVariable("long_url") String short_url) {
-        return urlRepository.save(new Url(short_url, long_url));
-    }
+    @PostMapping("/")
+    public String Create(@RequestBody HashMap<Object, String> payload) throws Exception {
+        Url    existingUrl = urlRepository.findByLongUrl(payload.get("url"));
+        String shortUrl;
 
-    @DeleteMapping ("/delete/{long_url}")
-    public Boolean Delete(@PathVariable("long_url") String long_url) {
-        if(urlRepository.findByLongUrl(long_url) == null){
-            return false;
+        if (existingUrl != null)
+            shortUrl = existingUrl.getShortUrl ();
+        else {
+            String preferred = payload.get("preferred");
+            if (preferred != null) {
+                shortUrl = preferred;
+            } else {
+                shortUrl = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+            }
+            urlRepository.save(new Url(shortUrl, payload.get("url")));
         }
-        urlRepository.delete(urlRepository.findByLongUrl(long_url));
-        return true;
+
+        return ("{url:\"" + shortUrl + "\"}");
     }
 
-    @GetMapping(value = "/redirect/{short_url}")
-    public RedirectView Redirect (@PathVariable("short_url") String short_url) {
-        Url shortUrl = urlRepository.findByShortUrl(short_url);
-        return new RedirectView(shortUrl.getLongUrl());
+    @DeleteMapping ("/")
+    public String Destroy(@RequestBody HashMap<Object, String> payload) throws Exception {
+        Url existingUrl = urlRepository.findByShortUrl(payload.get ("url"));
+        String result;
+
+        if(existingUrl == null) {
+            result = "failed";
+        } else {
+            urlRepository.delete(existingUrl);
+            result = "success";
+        }
+
+        return ("{result:\"" + result + "\"}");
+    }
+
+
+    @RequestMapping(value = "/{shortUrl}", method = RequestMethod.GET)
+    public ModelAndView Redirect(@PathVariable("shortUrl") String shortUrl) {
+        Url existingUrl = urlRepository.findByShortUrl(shortUrl);
+
+        String longUrl;
+        if (existingUrl == null)
+            longUrl = "/info";
+        else
+            longUrl = existingUrl.getLongUrl();
+
+        return new ModelAndView("redirect:https://" + longUrl);
     }
 }
 
