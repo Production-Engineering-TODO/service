@@ -112,4 +112,16 @@ class UrlControllerTests {
 
         Assertions.assertEquals(response , "{result:\"failed\"}");
     }
+    
+    @Test
+    void simpleRedirectTest () throws Exception {
+        String expected = "https://www.google.ro";
+
+        urlRepository.save(new Url ("ggl", "www.google.ro"));
+
+        String response = mockMvc.perform(get("/ggl"))
+                                .andReturn().getResponse().getRedirectedUrl();
+
+        Assertions.assertEquals(expected, response);
+    }
 }
