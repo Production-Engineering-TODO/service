@@ -44,4 +44,29 @@ public class Url {
                 ", shortUrl='" + shortUrl + '\'' +
                 '}';
     }
+
+    public String simpleShortenUrl() {
+        String splitUrl = this.longUrl.split(".");
+        if (splitUrl[1].lenght()<3){
+            shorUrl = splitUrl[1] + "-" + splitUrl[2];
+        }
+        else{
+            String shortUrl = splitUrl[1].substring(0,3);
+        }
+
+        return shortUrl;
+    }
+
+    public String findUrlDomain(){
+        String splitUrl = this.longUrl.split(".");
+
+        return splitUrl[2];
+    }
+
+    public boolean matchUrlDomain(String domain){
+        String splitUrl = this.longUrl.split(".");
+
+        return domain==splitUrl[2];
+    }
+
 }
