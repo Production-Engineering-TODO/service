@@ -3,21 +3,23 @@ package ro.unibuc.hello.data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Objects;
+
 @Document(collection = "url")
 public class Url {
 
     @Id
     public String id;
 
-	private String longUrl;
-	
-	private String shortUrl;
-    
+    private String longUrl;
+
+    private String shortUrl;
+
     public Url (String pShortUrl, String pLongUrl) {
         shortUrl = pShortUrl;
         longUrl  = pLongUrl;
     }
-    
+
     public Url () {
     }
 
@@ -46,9 +48,9 @@ public class Url {
     }
 
     public String simpleShortenUrl() {
-        String splitUrl = this.longUrl.split(".");
-        if (splitUrl[1].lenght()<3){
-            shorUrl = splitUrl[1] + "-" + splitUrl[2];
+        String[] splitUrl = this.longUrl.split("\\.");
+        if (splitUrl[1].length()<3){
+            String shorUrl = splitUrl[1] + "-" + splitUrl[2];
         }
         else{
             String shortUrl = splitUrl[1].substring(0,3);
@@ -58,15 +60,15 @@ public class Url {
     }
 
     public String findUrlDomain(){
-        String splitUrl = this.longUrl.split(".");
+        String[] splitUrl = this.longUrl.split("\\.");
 
         return splitUrl[2];
     }
 
     public boolean matchUrlDomain(String domain){
-        String splitUrl = this.longUrl.split(".");
+        String[] splitUrl = this.longUrl.split("\\.");
 
-        return domain==splitUrl[2];
+        return Objects.equals(domain, splitUrl[2]);
     }
 
 }
