@@ -7,6 +7,9 @@ pipeline {
                 sh 'gradle clean build'
             }
         }
+        stage('Test') {
+            sh './gradlew test --info'
+        }
         stage('Tag image') {
             steps {
                 script {
