@@ -2,6 +2,11 @@ pipeline {
     agent any
 
     stages {
+        stage('Gradle') {
+            steps {
+                sh 'gradle clean build'
+            }
+        }
         stage('Tag image') {
             steps {
                 script {
