@@ -8,7 +8,9 @@ pipeline {
             }
         }
         stage('Test') {
-            sh './gradlew test --info'
+            steps {
+                sh './gradlew test --info'
+            }
         }
         stage('Tag image') {
             steps {
