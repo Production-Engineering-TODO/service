@@ -7,9 +7,17 @@ pipeline {
                 sh 'gradle clean build'
             }
         }
-        stage('Test') {
+        stage('Unit and Integration Testing') {
             steps {
                 sh './gradlew test --info'
+            }
+        }
+        stage('Performance Testing') {
+            steps {
+                sh 'gradle bootRun &'
+                sh 'jmeter -n -t src/test/PerformanceTesting.jmx -l results.jtl'
+                sh 'gradle -stop'
+                sh 'cat results.jtl'
             }
         }
         stage('Tag image') {
