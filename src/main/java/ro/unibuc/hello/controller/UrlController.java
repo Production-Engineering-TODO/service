@@ -28,7 +28,13 @@ public class UrlController {
             if (preferred != null) {
                 shortUrl = preferred;
             } else {
-                shortUrl = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+                Url    existingShortUrl = urlRepository.findByShortUrl(payload.get("preferred"));
+                if (existingShortUrl == null) {
+                    shortUrl = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+                }
+                else {
+                    shortUrl = existingShortUrl.getShortUrl ();
+                }
             }
             urlRepository.save(new Url(shortUrl, payload.get("url")));
         }
