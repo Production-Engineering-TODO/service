@@ -1,5 +1,8 @@
 package ro.unibuc.hello.controller;
 
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +19,9 @@ public class HelloWorldController {
 
     @Autowired
     private InformationRepository informationRepository;
+
+    @Autowired
+    MeterRegistry metricsRegistry;
 
     private static final String helloTemplate = "Hello, %s!";
     private static final String informationTemplate = "%s : %s!";
