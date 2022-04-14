@@ -1,5 +1,8 @@
 package ro.unibuc.hello.controller;
 
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,7 +19,12 @@ public class UrlController {
 	@Autowired
 	private UrlRepository urlRepository;
 
+    @Autowired
+    MeterRegistry metricsRegistry;
+
     @PostMapping("/")
+    @Timed(value = "url.create.time", description = "Time taken to create url")
+    @Counted(value = "url.create.count", description = "Times url was created")
     public String Create(@RequestBody HashMap<Object, String> payload) throws Exception {
         Url    existingUrl = urlRepository.findByLongUrl(payload.get("url"));
         String shortUrl;
@@ -43,6 +51,8 @@ public class UrlController {
     }
 
     @DeleteMapping ("/")
+    @Timed(value = "url.delete.time", description = "Time taken to delete url")
+    @Counted(value = "url.delete.count", description = "Times url was deleted")
     public String Destroy(@RequestBody HashMap<Object, String> payload) throws Exception {
         Url existingUrl = urlRepository.findByShortUrl(payload.get ("url"));
         String result;
@@ -59,6 +69,8 @@ public class UrlController {
 
 
     @RequestMapping(value = "/{shortUrl}", method = RequestMethod.GET)
+    @Timed(value = "url.redirect.time", description = "Time taken to redirect url")
+    @Counted(value = "url.redirect.count", description = "Times url was redirected")
     public ModelAndView Redirect(@PathVariable("shortUrl") String shortUrl) {
         Url existingUrl = urlRepository.findByShortUrl(shortUrl);
 
